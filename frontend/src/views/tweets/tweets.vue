@@ -1,5 +1,5 @@
 <template>
-  <app>
+  <layout-app>
     <template #title> Tweets </template>
 
     <simple-table :rows="rows" :columns="columns">
@@ -16,19 +16,13 @@
         </span>
       </template>
     </simple-table>
-  </app>
+  </layout-app>
 </template>
 
 <script>
-import SimpleTable from "../../components/simple-table.vue";
-import App from "../../layouts/app/app.vue";
-
 export default {
   name: "Tweets",
-  components: {
-    App,
-    SimpleTable,
-  },
+  components: {},
 
   setup() {
     return {

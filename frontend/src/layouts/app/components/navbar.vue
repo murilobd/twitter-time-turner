@@ -12,19 +12,20 @@
           </div>
           <div class="hidden md:block">
             <div class="ml-10 flex items-baseline space-x-4">
-              <a
+              <router-link
                 v-for="item in navigation"
                 :key="item.name"
-                :href="item.href"
+                :to="{ name: item.routeName }"
                 :class="[
-                  item.current
+                  item.routeName === currentRouteName
                     ? 'bg-gray-900 text-white'
                     : 'text-gray-300 hover:bg-gray-700 hover:text-white',
                   'px-3 py-2 rounded-md text-sm font-medium',
                 ]"
                 :aria-current="item.current ? 'page' : undefined"
-                >{{ item.name }}</a
               >
+                {{ item.name }}
+              </router-link>
             </div>
           </div>
         </div>
@@ -130,15 +131,17 @@
         <DisclosureButton
           v-for="item in navigation"
           :key="item.name"
-          as="a"
-          :href="item.href"
+          as="router-link"
+          :to="{ name: item.routeName }"
           :class="[
-            item.current
+            item.routeName === currentRouteName
               ? 'bg-gray-900 text-white'
               : 'text-gray-300 hover:bg-gray-700 hover:text-white',
             'block px-3 py-2 rounded-md text-base font-medium',
           ]"
-          :aria-current="item.current ? 'page' : undefined"
+          :aria-current="
+            item.routeName === currentRouteName ? 'page' : undefined
+          "
           >{{ item.name }}</DisclosureButton
         >
       </div>
@@ -181,6 +184,8 @@
 </template>
 
 <script>
+import { useRoute } from "vue-router";
+import { watch } from "vue";
 import {
   Disclosure,
   DisclosureButton,
@@ -199,8 +204,8 @@ const user = {
     "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
 };
 const navigation = [
-  { name: "Tweets", href: "#", current: true },
-  { name: "+ Schedule a new Tweet", href: "#", current: false },
+  { name: "Tweets", routeName: "tweets" },
+  { name: "+ Schedule a new Tweet", routeName: "new-tweet" },
 ];
 const userNavigation = [
   { name: "Your Profile", href: "#" },
@@ -221,10 +226,12 @@ export default {
     XIcon,
   },
   setup() {
+    const route = useRoute();
     return {
       user,
       navigation,
       userNavigation,
+      currentRouteName: route.name,
     };
   },
 };

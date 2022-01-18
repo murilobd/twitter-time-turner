@@ -1,30 +1,14 @@
 import { createApp, h } from 'vue';
-import Tweets from "./pages/tweets/tweets.vue";
+import App from "./App.vue";
+import LayoutApp from "./layouts/app/app.vue";
+import router from "./router.js";
 import SimpleTable from "./components/simple-table.vue";
 import './style.css';
 
-const routes = {
-    '/': Tweets
-};
-
-const SimpleRouter = {
-    data: () => ({
-        currentRoute: window.location.pathname
-    }),
-
-    computed: {
-        CurrentComponent() {
-            return routes[this.currentRoute];
-        }
-    },
-
-    render() {
-        return h(this.CurrentComponent);
-    }
-}
-
-const app = createApp(SimpleRouter)
-app.component("SimpleTable", SimpleTable);
 
 
-app.mount('#app');
+createApp(App)
+    .use(router)
+    .component("SimpleTable", SimpleTable)
+    .component("LayoutApp", LayoutApp)
+    .mount('#app');
