@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use Laravel\Sanctum\HasApiTokens;
+use Abraham\TwitterOAuth\TwitterOAuth;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
@@ -22,7 +23,9 @@ class User extends Authenticatable
         'email',
         'password',
         'twitter_user_id',
-        'twitter_avatar'
+        'twitter_avatar',
+        'twitter_oauth_token',
+        'twitter_oauth_token_secret'
     ];
 
     /**
@@ -33,6 +36,8 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'twitter_oauth_token',
+        'twitter_oauth_token_secret'
     ];
 
     /**
@@ -43,4 +48,9 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function twitterConnection()
+    {
+        return new TwitterOAuth(env('TWITTER_CONSUMER_KEY'), env('TWITTER_CONSUMER_SECRET'), $this->twitter_oauth_token, $this->twitter_oauth_token_secret);
+    }
 }

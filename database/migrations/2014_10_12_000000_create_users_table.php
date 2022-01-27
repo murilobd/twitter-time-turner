@@ -21,6 +21,8 @@ class CreateUsersTable extends Migration
             $table->string('password')->nullable();
             $table->string('twitter_user_id');
             $table->string('twitter_avatar')->nullable();
+            $table->string('twitter_oauth_token')->nullable()->description("twitter oauth token necessary to tweet using users account");
+            $table->string('twitter_oauth_token_secret')->nullable()->description("twitter oauth token secret necessary to tweet using users account");
             $table->rememberToken();
             $table->timestamps();
         });

@@ -31,8 +31,8 @@ return [
     ],
 
     'twitter' => [
-        'client_id' => env('TWITTER_API_KEY'),
-        'client_secret' => env('TWITTER_API_SECRET'),
+        'client_id' => env('TWITTER_CONSUMER_KEY'),
+        'client_secret' => env('TWITTER_CONSUMER_SECRET'),
         'redirect' => env('TWITTER_REDIRECT_URL'),
     ],
 

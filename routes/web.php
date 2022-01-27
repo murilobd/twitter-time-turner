@@ -14,8 +14,13 @@ use App\Http\Controllers\AuthController;
 |
 */
 
-Route::get('/login/twitter', [AuthController::class, 'redirectToProvider']);
-Route::get('/login/twitter/callback', [AuthController::class, 'handleProviderCallback']);
+Route::controller(AuthController::class)->group(function () {
+    Route::get('/login/twitter', 'redirectToProvider');
+    Route::get('/login/twitter/callback', 'handleProviderCallback');
+
+    Route::get('/request_tweeter_oauth', 'requestOauth');
+    Route::get('/request_tweeter_oauth/callback', 'handleOauthCallback');
+});
 
 Route::get('/', function () {
     return view('welcome');
