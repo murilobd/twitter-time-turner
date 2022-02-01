@@ -71,7 +71,7 @@ class AuthController extends Controller
         $tokens = $twitter->oauth("oauth/request_token", ['oauth_callback' => 'http://localhost/request_tweeter_oauth/callback']);
         if ($twitter->getLastHttpCode() == 200) {
             $url = $twitter->url("oauth/authorize", ["oauth_token" => $tokens['oauth_token'], 'oauth_callback' => 'http://localhost/request_tweeter_oauth/callback']);
-            return $url;
+            return redirect()->away($url);
         } else {
             dd($twitter);
             // Handle error case
@@ -91,7 +91,11 @@ class AuthController extends Controller
                 'twitter_oauth_token' => $access_token['oauth_token'],
                 'twitter_oauth_token_secret' => $access_token['oauth_token_secret']
             ]);
-            return response()->json(["ok"], 200);
+            // revoke all auth token from user
+            $user->tokens()->delete();
+            // create a new one
+            $token = $user->createToken('login-twitter')->plainTextToken;
+            return redirect()->away(env('FRONTEND_URL') . '/login?access-token=' . $token, 302, ['Access-Token' => $token]);
         } else {
             dd($twitter);
             // Handle error case

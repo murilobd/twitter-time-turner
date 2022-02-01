@@ -47,7 +47,18 @@ class User extends Authenticatable
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'twitter_oauth_ok' => 'boolean'
     ];
+
+    protected $appends = ['twitter_oauth_ok'];
+
+    /**
+     * Check if user has authorized app to post in his behalf
+     */
+    public function getTwitterOauthOkAttribute()
+    {
+        return $this->twitter_oauth_token && $this->twitter_oauth_token_secret;
+    }
 
     public function twitterConnection()
     {

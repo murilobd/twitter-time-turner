@@ -2,7 +2,7 @@
     <layout-app>
         <template #title>New Tweet</template>
 
-        <form class="space-y-8 divide-y divide-gray-200">
+        <form class="space-y-8 divide-y divide-gray-200" @submit.prevent="postTweet">
             <div class="space-y-8 divide-y divide-gray-200">
                 <div>
                     <!-- Header 1 -->
@@ -21,6 +21,7 @@
                             <label for="about" class="block text-sm font-medium text-gray-700">Tweet</label>
                             <div class="mt-1">
                                 <textarea
+                                    v-model="content"
                                     id="tweet"
                                     name="tweet"
                                     rows="3"
@@ -79,7 +80,7 @@
 
                 <div class="pt-5">
                     <div class="flex justify-end space-x-2">
-                        <ttt-button inverted>Cancel</ttt-button>
+                        <ttt-button inverted @click="getUser">Cancel</ttt-button>
                         <ttt-button type="submit">Schedule tweet</ttt-button>
                     </div>
                 </div>
@@ -99,12 +100,70 @@ export default {
         Datepicker,
     },
 
-    setup() {
-        const date = ref(new Date());
-
+    data() {
         return {
-            date,
+            date: new Date(),
+            content: ""
         };
     },
+
+    methods: {
+        async postTweet() {
+            try {
+                const backendUrl = import.meta.env.VITE_BACKEND_URL;
+                const fetchData = await this.$http(`${backendUrl}/api/twitter`, {
+                    method: 'POST',
+                    body: {
+                        content: this.content
+                    }
+                });
+                console.log(fetchData);
+                alert("Uhul!");
+            } catch (error) {
+                alert("ops!");
+                console.log(error);
+            }
+        },
+
+        async getUser() {
+            try {
+                const backendUrl = import.meta.env.VITE_BACKEND_URL;
+                const fetchData = await this.$http(`${backendUrl}/api/user`);
+                console.log(fetchData);
+                alert("Uhul!");
+            } catch (error) {
+                alert("ops!");
+                console.log(error);
+            }
+        }
+    }
+
+    // setup() {
+    //     const date = ref(new Date());
+    //     const content = ref("");
+
+    //     async function postTweet() {
+    //         try {
+    //             const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    //             const fetchData = await this.$http(`${backendUrl}/twitter`, {
+    //                 method: 'POST',
+    //                 body: JSON.parse({
+    //                     content: content.value
+    //                 })
+    //             });
+    //             console.log(fetchData);
+    //             alert("Uhul!");
+    //         } catch (error) {
+    //             alert("ops!");
+    //             console.log(error);
+    //         }
+    //     }
+
+    //     return {
+    //         date,
+    //         content,
+    //         postTweet
+    //     };
+    // },
 };
 </script>
