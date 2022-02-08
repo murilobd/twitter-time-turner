@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Tweet;
 use Laravel\Sanctum\HasApiTokens;
 use Abraham\TwitterOAuth\TwitterOAuth;
 use Illuminate\Notifications\Notifiable;
@@ -63,5 +64,10 @@ class User extends Authenticatable
     public function twitterConnection()
     {
         return new TwitterOAuth(env('TWITTER_CONSUMER_KEY'), env('TWITTER_CONSUMER_SECRET'), $this->twitter_oauth_token, $this->twitter_oauth_token_secret);
+    }
+
+    public function tweets()
+    {
+        return $this->hasMany(Tweet::class, 'user_id');
     }
 }
