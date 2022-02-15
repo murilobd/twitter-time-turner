@@ -20,6 +20,7 @@ class CreateTweetsTable extends Migration
             $table->string('timezone');
             $table->dateTime('publish_datetime');
             $table->string('tweet_id')->nullable()->description("After posting, store tweet id");
+            $table->dateTime('publish_datetime_utc')->description("When it will, indeed, post this tweet");
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users');

@@ -16,15 +16,15 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
         return $request->user();
     });
 
-    Route::resource('tweet', TweetController::class);
+    Route::resource('tweets', TweetController::class);
 
-    Route::post('/twitter', function (Request $request) {
-        // return response()->json(["ok"]);
-        $content = $request->input("content");
-        $user = auth()->user();
-        $twitter = $user->twitterConnection();
-        $twitterPost = $twitter->post("statuses/update", ["status" => $content]);
-        return response()->json($twitterPost, 200);
-        // return $twitter->get("account/verify_credentials");
-    });
+    // Route::post('/twitter', function (Request $request) {
+    //     // return response()->json(["ok"]);
+    //     $content = $request->input("tweet");
+    //     $user = auth()->user();
+    //     $twitter = $user->twitterConnection();
+    //     $twitterPost = $twitter->post("statuses/update", ["status" => $content]);
+    //     return response()->json($twitterPost, 200);
+    //     // return $twitter->get("account/verify_credentials");
+    // });
 });

@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Tweet;
+use App\Jobs\PublishTweet;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use App\Http\Resources\TweetResource;
 use App\Http\Requests\StoreTweetRequest;
 use App\Http\Requests\UpdateTweetRequest;
-use App\Http\Resources\TweetResource;
-use App\Models\Tweet;
 
 class TweetController extends Controller
 {
@@ -14,9 +17,17 @@ class TweetController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $user = auth()->user();
+
+        // show all tweets scheduled in specified month and year (if not specified it will use current date)
+        $today = Carbon::now();
+        $month = $request->query('month', $today->month);
+        $year = $request->query('month', $today->year);
+
+        $tweets = $user->tweets()->whereMonth('publish_datetime', $month)->whereYear('publish_datetime', $year)->orderBy('publish_datetime', 'asc')->get();
+        return TweetResource::collection($tweets);
     }
 
     /**
@@ -27,8 +38,21 @@ class TweetController extends Controller
      */
     public function store(StoreTweetRequest $request)
     {
+        $validatedFields = $request->validated();
         $user = auth()->user();
-        $new_tweet = $user->tweets()->create($request->validated());
+
+        // when user wants to publish now the tweet, change publish_datetime to a minute ago to avoid cron job to double post the same tweet
+        if ($validatedFields['publish_now']) {
+            $dateToPublish = Carbon::now()->timezone($validatedFields['timezone'])->subtract(1, "minute");
+            $validatedFields['publish_datetime'] = $dateToPublish;
+        }
+
+        $new_tweet = $user->tweets()->create($validatedFields);
+
+        // dispatch immediately the tweet
+        if ($validatedFields['publish_now']) {
+            PublishTweet::dispatch($new_tweet);
+        }
 
         return response()->json(TweetResource::make($new_tweet), 201);
     }
@@ -64,6 +88,7 @@ class TweetController extends Controller
      */
     public function destroy(Tweet $tweet)
     {
-        //
+        $tweet->delete();
+        return response()->json(TweetResource::make($tweet), 200);
     }
 }

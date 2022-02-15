@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\TweetRequest;
 
-class UpdateTweetRequest extends FormRequest
+class UpdateTweetRequest extends TweetRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -13,18 +13,11 @@ class UpdateTweetRequest extends FormRequest
      */
     public function authorize()
     {
+        // edit tweet still in progress
         return false;
-    }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
-    public function rules()
-    {
-        return [
-            //
-        ];
+
+        // don't authorize to update a tweet if it's already published
+        return auth()->user()->twitter_oauth_ok && !$this->tweet_id;
     }
 }
