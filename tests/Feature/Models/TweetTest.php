@@ -74,7 +74,8 @@ class TweetTest extends TestCase
                 'tweet' => 'Testing tweeter',
                 'timezone' => 'America/Sao_Paulo',
                 'publish_datetime' => $now->seconds(0)->toDateTimeString(),
-                'is_published' => false
+                'is_published' => false,
+                'tweet_id' => null
             ]);
 
         Bus::assertNotDispatched(PublishTweet::class);
@@ -108,7 +109,8 @@ class TweetTest extends TestCase
                 'tweet' => 'Testing tweeter',
                 'timezone' => 'America/Sao_Paulo',
                 'publish_datetime' => $now->subtract(1, "minute")->toDateTimeString(), // this will overwrite the $now to -1 minute
-                'is_published' => false
+                'is_published' => false,
+                'tweet_id' => null
             ]);
 
         Bus::assertDispatched(PublishTweet::class);
@@ -134,7 +136,7 @@ class TweetTest extends TestCase
             ->state(
                 new Sequence(
                     ['tweet_id' => null],
-                    ['tweet_id' => (string) Str::uuid()]
+                    ['tweet_id' => $tweet_id = (string) Str::uuid()]
                 )
             )
             ->for($user)
@@ -149,14 +151,16 @@ class TweetTest extends TestCase
                         'tweet' => $tweets[0]->tweet,
                         'timezone' => $tweets[0]->timezone,
                         'publish_datetime' => $publish_datetime,
-                        'is_published' => false
+                        'is_published' => false,
+                        'tweet_id' => null
                     ],
                     [
                         'id' => $tweets[1]->id,
                         'tweet' => $tweets[1]->tweet,
                         'timezone' => $tweets[1]->timezone,
                         'publish_datetime' => $publish_datetime,
-                        'is_published' => true
+                        'is_published' => true,
+                        'tweet_id' => $tweet_id
                     ]
                 ]
             ]);
@@ -183,7 +187,8 @@ class TweetTest extends TestCase
                 'tweet' => $tweet->tweet,
                 'timezone' => $tweet->timezone,
                 'publish_datetime' => $tweet->publish_datetime->toDateTimeString(),
-                'is_published' => $tweet->is_published
+                'is_published' => $tweet->is_published,
+                'tweet_id' => $tweet->tweet_id
             ]);
 
         $this->assertDatabaseMissing(

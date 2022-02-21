@@ -54,10 +54,13 @@
                                     id="timezone"
                                     name="timezone"
                                     autocomplete="timezone-name"
+                                    v-model="timezone"
                                     class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
                                 >
-                                    <option value="Europe/Paris" selected>Paris</option>
-                                    <option value="America/Sao_Paulo">São Paulo</option>
+                                    <option
+                                        v-for="timezone of availableTimezones"
+                                        :value="timezone"
+                                    >{{ timezone }}</option>
                                 </select>
                             </div>
                         </div>
@@ -93,29 +96,35 @@
 import { ref } from "vue";
 import Datepicker from "vue3-date-time-picker";
 import "vue3-date-time-picker/dist/main.css";
+import { fetcher } from "../../helpers/http.js";
+import timezones from "../../helpers/timezones.js";
+import dayjs from "../../helpers/dayjs.js";
 
 export default {
     name: "NewTweet",
     components: {
-        Datepicker,
+        Datepicker
     },
 
     data() {
         return {
             date: new Date(),
-            content: ""
+            content: "",
+            timezone: "Europe/Paris"
         };
     },
 
     methods: {
         async postTweet() {
             try {
-                const backendUrl = import.meta.env.VITE_BACKEND_URL;
-                const fetchData = await this.$http(`${backendUrl}/api/twitter`, {
+                const final = {
+                    tweet: this.content,
+                    timezone: this.timezone,
+                    publish_datetime: dayjs(this.date).format("YYYY-MM-DD HH:mm:ss")
+                }
+                const fetchData = await fetcher(`/api/tweets`, {
                     method: 'POST',
-                    body: {
-                        content: this.content
-                    }
+                    body: final
                 });
                 console.log(fetchData);
                 alert("Uhul!");
@@ -123,18 +132,12 @@ export default {
                 alert("ops!");
                 console.log(error);
             }
-        },
+        }
+    },
 
-        async getUser() {
-            try {
-                const backendUrl = import.meta.env.VITE_BACKEND_URL;
-                const fetchData = await this.$http(`${backendUrl}/api/user`);
-                console.log(fetchData);
-                alert("Uhul!");
-            } catch (error) {
-                alert("ops!");
-                console.log(error);
-            }
+    computed: {
+        availableTimezones() {
+            return timezones;
         }
     }
 
@@ -145,7 +148,7 @@ export default {
     //     async function postTweet() {
     //         try {
     //             const backendUrl = import.meta.env.VITE_BACKEND_URL;
-    //             const fetchData = await this.$http(`${backendUrl}/twitter`, {
+    //             const fetchData = await fetcher(`${backendUrl}/twitter`, {
     //                 method: 'POST',
     //                 body: JSON.parse({
     //                     content: content.value

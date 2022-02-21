@@ -24,7 +24,7 @@ class TweetController extends Controller
         // show all tweets scheduled in specified month and year (if not specified it will use current date)
         $today = Carbon::now();
         $month = $request->query('month', $today->month);
-        $year = $request->query('month', $today->year);
+        $year = $request->query('year', $today->year);
 
         $tweets = $user->tweets()->whereMonth('publish_datetime', $month)->whereYear('publish_datetime', $year)->orderBy('publish_datetime', 'asc')->get();
         return TweetResource::collection($tweets);

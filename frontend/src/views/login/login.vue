@@ -3,56 +3,6 @@
         <template v-slot:title>Twitter Time Turner</template>
         <template v-slot:subtitle>Sign in using your Twitter account</template>
         <form class="space-y-6" @submit.prevent="redirectToLogin">
-            <!-- <div>
-                <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
-                <div class="mt-1">
-                    <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        autocomplete="email"
-                        required
-                        class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    />
-                </div>
-            </div>-->
-
-            <!-- <div>
-                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
-                <div class="mt-1">
-                    <input
-                        id="password"
-                        name="password"
-                        type="password"
-                        autocomplete="current-password"
-                        required
-                        class="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    />
-                </div>
-            </div>-->
-
-            <!-- <div class="flex items-center justify-between">
-                <div class="flex items-center">
-                    <input
-                        id="remember-me"
-                        name="remember-me"
-                        type="checkbox"
-                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                    />
-                    <label for="remember-me" class="ml-2 block text-sm text-gray-900">Remember me</label>
-                </div>
-
-                <div class="text-sm">
-                    <a
-                        href="#"
-                        class="font-medium text-indigo-600 hover:text-indigo-500"
-                    >Forgot your password?</a>
-                </div>
-            </div>-->
-
-            <!-- <div>
-                <ttt-button type="submit" class="w-full">Sign in</ttt-button>
-            </div>-->
             <div>
                 <div class="relative">
                     <div class="absolute inset-0 flex items-center">
@@ -73,19 +23,65 @@
 
 <script>
 import TwitterLoginButton from "./components/twitter-login-button.vue"
+
+import { onMounted } from "vue";
+import { useRouter, useRoute } from 'vue-router'
+import useUser from "../../composables/useUser.js";
+import { fetcher } from "../../helpers/http.js";
+
 export default {
     name: "LoginView",
 
-    created() {
-        console.log(this.$route.query);
-    },
+    setup() {
+        const backendUrl = import.meta.env.VITE_BACKEND_URL;
+        const accessTokenKey = import.meta.env.VITE_ACCESS_TOKEN_KEY
+        const { setUser } = useUser();
+        const route = useRoute();
+        const router = useRouter();
 
-    methods: {
-        async redirectToLogin() {
-            const backendUrl = import.meta.env.VITE_BACKEND_URL;
-            // const csrfToken = await this.$http(`${backendUrl}/sanctum/csrf-cookie`);
-            // console.log(csrfToken);
+        const redirectToLogin = () => {
             window.location.href = `${backendUrl}/login/twitter`;
+        }
+
+        const loginUser = async () => {
+            try {
+                const dataUser = await fetcher("/api/user")
+                setUser(dataUser.data);
+                return dataUser.data;
+            } catch (error) {
+                console.error("Failed authenticating user", error);
+                return null;
+            }
+        }
+
+        onMounted(async () => {
+            // check if in url there's a query param called "access-token" to login user or if there's an access token ready to be used
+            const accessToken = route.query[accessTokenKey] || localStorage.getItem(accessTokenKey);
+            if (accessToken) {
+                localStorage.setItem(accessTokenKey, accessToken);
+                const user = await loginUser();
+                // if fails authenticating
+                // TODO: improve this to display error message to user
+                if (!user) {
+                    alert("Not authenticated");
+                    return;
+                }
+                // TODO: improe to show error message if fails getting twitter authorization to post on behalf user
+                if (!user.twitter_oauth_ok) {
+                    window.location.href = `${backendUrl}/request_tweeter_oauth`;
+                    return;
+                }
+
+                // logged in! uhul!
+                router.push({
+                    path: "/"
+                });
+            }
+        })
+
+
+        return {
+            redirectToLogin
         }
     },
 

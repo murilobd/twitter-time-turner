@@ -5,17 +5,17 @@ import LayoutAuth from "./layouts/auth/auth.vue";
 import router from "./router.js";
 import SimpleTable from "./components/simple-table.vue";
 import TttButton from "./components/ttt-button.vue";
+import TttLoading from "./components/ttt-loading.vue";
 
-import httpPlugin from './plugins/http.plugin.js';
 import './style.css';
 
 
 
 createApp(App)
-    .use(httpPlugin)
     .use(router)
     .component("SimpleTable", SimpleTable)
     .component("TttButton", TttButton)
+    .component("TttLoading", TttLoading)
     .component("LayoutApp", LayoutApp)
     .component("LayoutAuth", LayoutAuth)
     .mount('#app');

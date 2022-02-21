@@ -20,7 +20,8 @@ class TweetResource extends JsonResource
             'tweet' => $this->tweet,
             'publish_datetime' => Carbon::parse($this->publish_datetime)->format('Y-m-d H:i:s'),
             'timezone' => $this->timezone,
-            'is_published' => $this->is_published
+            'is_published' => $this->is_published,
+            'tweet_id' => $this->tweet_id
         ];
     }
 }
