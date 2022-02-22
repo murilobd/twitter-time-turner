@@ -29,7 +29,7 @@ class TweetRequest extends FormRequest
     public function rules()
     {
         return [
-            'tweet' => 'required',
+            'tweet' => 'required|max:140',
             'timezone' => 'bail|required|timezone',
             'publish_now' => 'boolean',
             'publish_datetime' => [

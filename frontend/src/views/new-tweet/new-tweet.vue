@@ -28,7 +28,9 @@
                                     class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"
                                 />
                             </div>
-                            <p class="mt-2 text-sm text-gray-500">You still have XXXX chars to type</p>
+                            <p
+                                class="mt-2 text-sm text-gray-500"
+                            >You still have {{ leftChars }} chars to type</p>
                         </div>
                     </div>
                 </div>
@@ -72,10 +74,19 @@
                             <div class="mt-1">
                                 <Datepicker
                                     v-model="date"
+                                    @update:modelValue="publishNow = false"
                                     autoApply
                                     :minDate="new Date()"
-                                    :showNowButton="true"
-                                />
+                                    showNowButton
+                                >
+                                    <template #now-button="{ selectCurrentDate }">
+                                        <span
+                                            class="cursor-pointer m-4 px-4 border rounded border-indigo-400"
+                                            @click="clickedPublishNow(selectCurrentDate)"
+                                            title="Now"
+                                        >Now</span>
+                                    </template>
+                                </Datepicker>
                             </div>
                         </div>
                     </div>
@@ -83,90 +94,90 @@
 
                 <div class="pt-5">
                     <div class="flex justify-end space-x-2">
-                        <ttt-button inverted @click="getUser">Cancel</ttt-button>
+                        <ttt-button inverted @click="resetForm">Cancel</ttt-button>
                         <ttt-button type="submit">Schedule tweet</ttt-button>
                     </div>
                 </div>
             </div>
         </form>
+
+        <TttSimpleModal ref="modal" :type="modalContent.type">
+            <template #title>{{ modalContent.title }}</template>
+            {{ modalContent.content }}
+            <template #button>{{ modalContent.button }}</template>
+        </TttSimpleModal>
     </layout-app>
 </template>
 
-<script>
-import { ref } from "vue";
+<script setup>
+import { ref, computed } from "vue";
 import Datepicker from "vue3-date-time-picker";
 import "vue3-date-time-picker/dist/main.css";
 import { fetcher } from "../../helpers/http.js";
 import timezones from "../../helpers/timezones.js";
 import dayjs from "../../helpers/dayjs.js";
 
-export default {
-    name: "NewTweet",
-    components: {
-        Datepicker
-    },
-
-    data() {
-        return {
-            date: new Date(),
-            content: "",
-            timezone: "Europe/Paris"
+// Automatically fill timezone for user
+const guessedTimezone = dayjs.tz.guess();
+const timezone = ref(timezones.includes(guessedTimezone) ? guessedTimezone : "Europe/Paris");
+const date = ref(new Date());
+const publishNow = ref(true);
+const content = ref("");
+const modal = ref(null);
+const modalContent = ref({
+    type: 'success',
+    title: "Yeah!",
+    content: 'Tweet scheduled!',
+    button: 'Ok! Thanks!'
+});
+const postTweet = async () => {
+    try {
+        const final = {
+            tweet: content.value,
+            timezone: timezone.value,
+            publish_datetime: dayjs(date.value).format("YYYY-MM-DD HH:mm:ss"),
+            publish_now: publishNow.value
+        }
+        const fetchData = await fetcher(`/api/tweets`, {
+            method: 'POST',
+            body: final
+        });
+        console.log(fetchData);
+        modalContent.value = {
+            type: 'success',
+            title: "Yeah!",
+            content: 'Tweet scheduled!',
+            button: 'Ok! Thanks!'
         };
-    },
-
-    methods: {
-        async postTweet() {
-            try {
-                const final = {
-                    tweet: this.content,
-                    timezone: this.timezone,
-                    publish_datetime: dayjs(this.date).format("YYYY-MM-DD HH:mm:ss")
-                }
-                const fetchData = await fetcher(`/api/tweets`, {
-                    method: 'POST',
-                    body: final
-                });
-                console.log(fetchData);
-                alert("Uhul!");
-            } catch (error) {
-                alert("ops!");
-                console.log(error);
-            }
+        await modal.value.openModal();
+        resetForm();
+    } catch (error) {
+        let errorMessage = error?.data?.message || "Ops! Something went wrong!";
+        if (error?.status === 422 && error?.data?.errors) {
+            errorMessage = Object.values(error?.data?.errors).flatMap(err => err).join(" ")
         }
-    },
-
-    computed: {
-        availableTimezones() {
-            return timezones;
-        }
+        modalContent.value = {
+            type: 'danger',
+            title: "Ops!",
+            content: errorMessage,
+            button: 'Close'
+        };
+        await modal.value.openModal();
     }
+}
 
-    // setup() {
-    //     const date = ref(new Date());
-    //     const content = ref("");
+const availableTimezones = computed(() => timezones);
+const leftChars = computed(() => 140 - (content.value?.length || 0))
 
-    //     async function postTweet() {
-    //         try {
-    //             const backendUrl = import.meta.env.VITE_BACKEND_URL;
-    //             const fetchData = await fetcher(`${backendUrl}/twitter`, {
-    //                 method: 'POST',
-    //                 body: JSON.parse({
-    //                     content: content.value
-    //                 })
-    //             });
-    //             console.log(fetchData);
-    //             alert("Uhul!");
-    //         } catch (error) {
-    //             alert("ops!");
-    //             console.log(error);
-    //         }
-    //     }
+const resetForm = () => {
+    date.value = new Date();
+    timezone.value = guessedTimezone;
+    content.value = "";
+}
 
-    //     return {
-    //         date,
-    //         content,
-    //         postTweet
-    //     };
-    // },
-};
+// that's silly, but when user click on the NOW button from datepicker, it will change the date value and set the publishNow to false. With the timeout, it will set publishNow to true.
+const clickedPublishNow = fn => {
+    fn(); // this is the internal method from datepicker that should be called to update the date
+    setTimeout(() => publishNow.value = true, 300)
+}
 </script>

@@ -6,6 +6,7 @@ import router from "./router.js";
 import SimpleTable from "./components/simple-table.vue";
 import TttButton from "./components/ttt-button.vue";
 import TttLoading from "./components/ttt-loading.vue";
+import TttSimpleModal from "./components/ttt-simple-modal.vue";
 
 import './style.css';
 
@@ -16,6 +17,7 @@ createApp(App)
     .component("SimpleTable", SimpleTable)
     .component("TttButton", TttButton)
     .component("TttLoading", TttLoading)
+    .component("TttSimpleModal", TttSimpleModal)
     .component("LayoutApp", LayoutApp)
     .component("LayoutAuth", LayoutAuth)
     .mount('#app');

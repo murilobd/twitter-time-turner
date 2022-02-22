@@ -7,7 +7,7 @@
                         <img
                             class="h-8 w-8"
                             src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg"
-                            alt="Workflow"
+                            alt="Twitter Time Turner"
                         />
                     </div>
                     <div class="hidden md:block">
@@ -145,7 +145,6 @@ const navigation = [
     { name: "+ Schedule a new Tweet", routeName: "new-tweet" },
 ];
 const userNavigation = [
-    { name: "Your Profile", href: "#" },
     { name: "Sign out", href: "#" },
 ];
 
